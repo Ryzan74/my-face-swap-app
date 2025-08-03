@@ -88,92 +88,86 @@
     </div>
 
     <script>
-        // Memastikan kode dijalankan setelah DOM sepenuhnya dimuat.
-        window.onload = function() {
-            // Dapatkan referensi ke elemen-elemen HTML.
-            const image1Input = document.getElementById('image1');
-            const image2Input = document.getElementById('image2');
-            const preview1 = document.getElementById('preview1');
-            const preview2 = document.getElementById('preview2');
-            const promptInput = document.getElementById('prompt');
-            const generateBtn = document.getElementById('generateBtn');
-            const loadingIndicator = document.getElementById('loading');
-            const resultContainer = document.getElementById('result-container');
-            const resultImage = document.getElementById('resultImage');
+// Memastikan kode dijalankan setelah DOM sepenuhnya dimuat.
+window.onload = function() {
+    // Dapatkan referensi ke elemen-elemen HTML.
+    const image1Input = document.getElementById('image1');
+    const image2Input = document.getElementById('image2');
+    const preview1 = document.getElementById('preview1');
+    const preview2 = document.getElementById('preview2');
+    const promptInput = document.getElementById('prompt');
+    const generateBtn = document.getElementById('generateBtn');
+    const loadingIndicator = document.getElementById('loading');
+    const resultContainer = document.getElementById('result-container');
+    const resultImage = document.getElementById('resultImage');
 
-            // GANTI DENGAN API KEY PRIBADI ANDA DI SINI
-            const = "apiKeyAIzaSyBw5hO9YnK6UVYm-mY3qR8qcN8NGaCI8qY";
+    // GANTI DENGAN API KEY PRIBADI ANDA DI SINI
+    const apiKey = "AIzaSyBw5hO9YnK6UVYm-mY3qR8qcN8NGaCI8qY";
 
-            // Fungsi untuk menampilkan pratinjau gambar yang diunggah.
-            const handleFileChange = (e, previewElement) => {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        previewElement.innerHTML = `<img src="${reader.result}" alt="Preview" class="object-cover w-full h-full">`;
-                    };
-                    reader.readAsDataURL(file);
-                }
+    // Fungsi untuk menampilkan pratinjau gambar yang diunggah.
+    const handleFileChange = (e, previewElement) => {
+        const file = e.target.files[0];
+        if (file) {
+            console.log('File berhasil dipilih:', file.name);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                previewElement.innerHTML = `<img src="${reader.result}" alt="Preview" class="object-cover w-full h-full">`;
             };
+            reader.readAsDataURL(file);
+        }
+    };
 
-            // Fungsi utama untuk memanggil API dan menghasilkan gambar.
-            const handleGenerate = async () => {
-                // Verifikasi apakah semua input telah diisi.
-                if (!image1Input.files[0] || !image2Input.files[0] || !promptInput.value) {
-                    alert('Silakan unggah kedua gambar dan masukkan deskripsi.');
-                    return;
-                }
+    // Fungsi utama untuk memanggil API dan menghasilkan gambar.
+    const handleGenerate = async () => {
+        if (!image1Input.files[0] || !image2Input.files[0] || !promptInput.value) {
+            alert('Silakan unggah kedua gambar dan masukkan deskripsi.');
+            return;
+        }
 
-                // Tampilkan indikator loading dan sembunyikan hasil sebelumnya.
-                generateBtn.disabled = true;
-                loadingIndicator.classList.remove('hidden');
-                resultContainer.classList.add('hidden');
+        generateBtn.disabled = true;
+        loadingIndicator.classList.remove('hidden');
+        resultContainer.classList.add('hidden');
 
-                try {
-                    // Membuat prompt yang akan dikirim ke model.
-                    const userPrompt = `A face swap between the two uploaded images. The final image should be a realistic combination of the two faces, according to the description: ${promptInput.value}`;
+        try {
+            const userPrompt = `A face swap between the two uploaded images. The final image should be a realistic combination of the two faces, according to the description: ${promptInput.value}`;
 
-                    // Persiapan payload untuk API.
-                    const payload = {
-                        instances: { prompt: userPrompt },
-                        parameters: { "sampleCount": 1 }
-                    };
-                    
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-                    
-                    // Panggil API dengan metode POST.
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    
-                    const result = await response.json();
-                    
-                    // Cek dan tampilkan gambar hasil.
-                    if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
-                        const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
-                        resultImage.src = imageUrl;
-                        resultContainer.classList.remove('hidden');
-                    } else {
-                        console.error("Kesalahan saat membuat gambar:", result);
-                        alert("Gagal membuat gambar. Silakan coba lagi.");
-                    }
-                } catch (error) {
-                    console.error("Panggilan API gagal:", error);
-                    alert("Terjadi kesalahan. Silakan periksa koneksi Anda.");
-                } finally {
-                    // Sembunyikan indikator loading dan aktifkan kembali tombol.
-                    loadingIndicator.classList.add('hidden');
-                    generateBtn.disabled = false;
-                }
+            const payload = {
+                instances: { prompt: userPrompt },
+                parameters: { "sampleCount": 1 }
             };
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+            
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            const result = await response.json();
+            
+            if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                resultImage.src = imageUrl;
+                resultContainer.classList.remove('hidden');
+            } else {
+                console.error("Kesalahan saat membuat gambar:", result);
+                alert("Gagal membuat gambar. Silakan coba lagi.");
+            }
+        } catch (error) {
+            console.error("Panggilan API gagal:", error);
+            alert("Terjadi kesalahan. Silakan periksa koneksi Anda.");
+        } finally {
+            loadingIndicator.classList.add('hidden');
+            generateBtn.disabled = false;
+        }
+    };
 
-            // Tambahkan event listener.
-            image1Input.addEventListener('change', (e) => handleFileChange(e, preview1));
-            image2Input.addEventListener('change', (e) => handleFileChange(e, preview2));
-            generateBtn.addEventListener('click', handleGenerate);
-        };
+    // Tambahkan event listener.
+    image1Input.addEventListener('change', (e) => handleFileChange(e, preview1));
+    image2Input.addEventListener('change', (e) => handleFileChange(e, preview2));
+    generateBtn.addEventListener('click', handleGenerate);
+};
     </script>
 </body>
 </html>
